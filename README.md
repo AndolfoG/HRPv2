@@ -2,11 +2,8 @@
 HRP-2.0
 Welcome to The full-length Homology-based R-gene Prediction: HRP-2.0.
 HRP-2.0 is a command-line workflow for the genome-wide prediction,
-classification and filtering of plant NB-LRR resistance genes. It identifies
-full-length NB-LRR proteins, uses them as GenBlastG queries, annotates every
-predicted model and removes false-positive or redundant predictions. When a
-compatible genome annotation is provided, annotated partial NB-LRR genes missed
-by GenBlastG are recovered and merged into the final catalogue.
+classification and filtering of plant NB-LRR resistance genes.
+
 Table of contents
 Essential software
 Installation checks
@@ -77,21 +74,20 @@ Coils must also be available among the installed InterProScan applications.
 Input files
 HRP-2.0 accepts two mandatory inputs and one optional input.
 Mandatory inputs
+
 Protein sequences in FASTA format
 This may be the proteome of the analysed species or a selected protein-query
-dataset. Terminal stop symbols (`*`) are removed from a cleaned working copy.
+dataset.
+
 Genome sequence in FASTA format
 This is the target genome used by GenBlastG for gene-model prediction.
-Optional input
-Genome annotation in GFF3 format
+
+Optional input: genome annotation in GFF3 format
 This file is used only to recover annotated partial NB-LRR genes that do not
 overlap filtered GenBlastG loci. It should be supplied only when it corresponds
-to the input proteome and target genome.
-`ID=` is the primary identifier used to associate proteins with GFF3 features.
-`protein_id=` and `transcript_id=` are accepted as exact-match fallbacks, and
-`Parent=` is used when available to reconstruct feature relationships.
-If the proteome is an external or specialised query dataset that does not match
+to the input proteome and target genome. If the proteome is an external or specialised query dataset that does not match
 the target annotation, omit the GFF3 file. The merging operation will be skipped.
+
 HRP-2.0 workflow
 The terminal reports six sections at the start of their corresponding steps:
 ```text
@@ -112,12 +108,7 @@ Exclude non-NLR models, proteins shorter than 50 amino acids and gene models
 longer than 20 kb.
 Resolve overlapping predictions only when they occur on the same chromosome
 and strand.
-Optionally recover unambiguous annotated partial genes containing NB-ARC from
-regions not occupied by retained GenBlastG loci.
-Opposite-strand predictions are retained independently. The filtering decision
-uses NLR class, domain-architecture completeness, LRR evidence, GenBlastG
-alignment score, GenBlastG rank, protein length and a deterministic identifier
-tie-break.
+
 Running HRP-2.0
 Make the script executable:
 ```bash
@@ -173,14 +164,13 @@ Final_NB-LRR-prediction.gff3
 ```
 `Final_NB-LRR-prediction.tsv` contains the classification, gene identifier,
 protein identifier, source, domain architecture and domain evidence.
+
 `Final_NB-LRR-prediction.fasta` contains the proteins corresponding to the
 final catalogue.
+
 `Final_NB-LRR-prediction.gff3` contains the filtered GenBlastG predictions and,
 when available, the recovered partial genes.
-Partial genes retain the original gene `ID` reported in the input GFF3. The same
-identifier is recorded in the `gene_id` column of the final TSV.
-When no annotation GFF3 is supplied, HRP-2.0 still generates the same three final
-files, but they contain only the filtered GenBlastG models.
+
 Intermediate prediction results are stored in:
 ```text
 predicted_NB-LRRs/
@@ -188,6 +178,7 @@ filtered_NB-LRR_models/
 ```
 Diagnostic reports document models excluded as non-NLR, threshold failures,
 overlap decisions, unmatched annotation identifiers and ambiguous matches.
+
 InterProScan configuration
 HRP-2.0 executes InterProScan twice:
 On the input protein dataset to select full-length NB-LRR queries.
@@ -218,20 +209,15 @@ The executable and supporting files are expected in:
 ```text
 $CONDA_PREFIX/bin/
 ```
+
 Notes and limitations
 The protein FASTA, genome FASTA and optional GFF3 must use compatible sequence
 and feature identifiers when merging is requested.
-Identifier matching is exact. Ambiguous or missing associations are reported
-and are never merged automatically.
-Partial models are recovered only when NB-ARC evidence is present.
-Partial models containing only CC, TIR, RPW8 or LRR evidence are not recovered.
-GenBlastG redundancy is assessed only for models on the same chromosome and
-strand.
 HRP-2.0 is designed for Linux 64-bit environments compatible with the selected
 InterProScan and GenBlastG releases.
+
 Authorship
-Developed by:
-Prof. Andolfo Giuseppe  
+Developed by: Prof. Andolfo Giuseppe  
 University of Naples "Federico II"  
 Plant Genetics and Biotechnology Unit  
 Piazza Carlo di Borbone, 1 - 80055 Portici (Naples), Italy
