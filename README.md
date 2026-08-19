@@ -1,4 +1,4 @@
-![HRP logo](https://github.com/AndolfoG/HRP/blob/main/LOGO.png)
+![HRP logo](https://github.com/AndolfoG/HRP-2.0/blob/main/LOGO.png)
 HRP-2.0
 Welcome to The full-length Homology-based R-gene Prediction: HRP-2.0.
 HRP-2.0 is a command-line workflow for the genome-wide prediction,
