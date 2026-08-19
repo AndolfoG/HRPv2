@@ -1,10 +1,10 @@
 ![HRP logo](https://github.com/AndolfoG/HRP-2.0/blob/main/LOGO.png)
-HRP-2.0
-Welcome to The full-length Homology-based R-gene Prediction: HRP-2.0.
-HRP-2.0 is a command-line workflow for the genome-wide prediction,
-classification and filtering of plant NB-LRR resistance genes.
 
-Table of contents
+# Introduction
+Welcome to to the full-length **H**omology-based **R**-gene **P**rediction version 2.0 (**HRPv2**) project.
+**HRPv2** is a command-line workflow for the genome-wide prediction, classification and filtering of plant NB-LRR resistance genes.
+
+## Table of Contents to use HRP
 Essential software
 Installation checks
 Input files
