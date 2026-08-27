@@ -125,7 +125,7 @@ reclassify an existing run without repeating the expensive external searches.
 1. **Protein sequences in FASTA format**
 
    This may be the proteome of the analysed species or a selected protein-query
-   dataset. Terminal stop symbols (`*`) are removed from a cleaned working copy.
+   dataset.
 
 2. **Genome sequence in FASTA format**
 
@@ -135,16 +135,8 @@ reclassify an existing run without repeating the expensive external searches.
 
 3. **Genome annotation in GFF3 format**
 
-   This file is used only to recover annotated partial NB-LRR genes that do not
-   overlap filtered GenBlastG loci. It should be supplied only when it corresponds
-   to the input proteome and target genome.
-
-   `ID=` is the primary identifier used to associate proteins with GFF3 features.
-   `protein_id=` and `transcript_id=` are accepted as exact-match fallbacks, and
-   `Parent=` is used when available to reconstruct feature relationships.
-
-If the proteome is an external or specialised query dataset that does not match
-the target annotation, omit the GFF3 file. The merging operation will be skipped.
+   This file hould be supplied only when it corresponds to the input proteome and target genome.
+   If the proteome is an external or specialised query dataset that does not match the target annotation, omit the GFF3 file. The merging operation will be skipped.
 
 <a id="hrpv222-workflow"></a>
 ## HRPv2 workflow
@@ -153,18 +145,23 @@ The terminal reports six sections at the start of their corresponding steps:
 
 ```text
 [1/6] Preflight validation and preparation of input files
+  
 [2/6] Full-length NB-LRR annotation using a protein motif/domain-based search (PDS)
+
 [3/6] Prediction of NB-LRR gene models
+
 [4/6] Annotation and classification of gene models
+
 [5/6] Filtering of redundant gene models
+
 [6/6] Full NB-LRR resistance gene repertoire
 ```
 
 The main operations are:
 
-1. Clean terminal stop symbols from the protein input.
-2. Annotate the proteins using Pfam, SUPERFAMILY and Coils.
-3. Select full-length CNL, TNL, RNL and NL proteins containing NB-ARC and LRR.
+1. Checking input files.
+2. Annotate the proteins using a protein motif/domain-based search.
+3. Select full-length CNL, TNL, RNL and NL proteins.
 4. Use the selected proteins as GenBlastG queries against the target genome.
 5. Annotate and classify every protein predicted by GenBlastG.
 6. Exclude non-NB-LRR models, proteins shorter than 50 amino acids and gene models
@@ -183,24 +180,11 @@ tie-break.
 ## Domain classification
 
 HRPv2 classifies complete NB-LRR proteins as CNL, TNL, RNL or NL and
-retains supported partial architectures. In addition to the original domain
-criteria, the following accessions are interpreted explicitly:
+retains supported partial architectures.
 
-| Evidence | Assigned domain or class |
-|---|---|
-| `PF23559`, `PF12061` | NB-ARC |
-| `PF18052` | CC; alone it supports `partial_C` |
-| `PF25019` | LRR |
-| `PTHR15140` + `IPR032675` | LRR |
-| `PTHR11017` or `PTHR23155` | supported partial NB-LRR evidence |
-| `PTHR11017`/`PTHR23155` + `IPR044974` | contextual LRR evidence downstream of an independently confirmed NB-ARC |
-
-Functional-description filtering is applied globally to both `partial_L` and
-`partial_CL`. Descriptions typical of membrane receptors and receptor kinases
-(for example combinations containing receptor/kinase, receptor-like,
-serine/threonine kinase, extracellular, transmembrane or signal-peptide
-evidence) act as a negative veto. This prevents generic LRR receptor proteins
-from being retained as partial NB-LRRs merely because another database reports
+Functional-description filtering is applied globally to `partial NB-LRR` genes.
+Descriptions typical of membrane receptors (RLP: receptor-like proteins and RLK: receptor-like kinase) act as a negative veto.
+This prevents generic plasma membrane receptors from being retained as partial NB-LRRs merely because another database reports
 an LRR signature. The triggering evidence is recorded in the
 `exclusion_evidence` column of the classification TSV.
 
@@ -214,7 +198,7 @@ other filtering evidence is compatible.
 HRPv2 also prevents a long GenBlastG prediction from incorrectly merging
 two adjacent NB-LRR loci:
 
-- `REPEATED_CORE` requires an ordered `NB-LRR ... NB-LRR` architecture.
+- `REPEATED_CORE` requires an ordered `NB-LRR` architecture.
 - `MULTI_NB_BRIDGE` identifies a multi-NB bridge that does not satisfy the
   strict repeated-core pattern.
 - A bridge can be replaced by two models only when both models are on the same
@@ -264,15 +248,6 @@ python3 HRPv2.py \
   --threads 8
 ```
 
-### Command-line execution without GFF3 merging
-
-```bash
-python3 HRPv2.py \
-  --proteome query_proteins.fasta \
-  --genome target_genome.fasta \
-  --threads 8
-```
-
 Display all options with:
 
 ```bash
@@ -310,18 +285,6 @@ python3 HRPv2.py \
   --skip-nb-rescue
 ```
 
-When these integrated files are supplied, the terminal explicitly reports:
-
-```text
-Existing InterProScan outputs reused
-Existing HMMER\MAST outputs reused
-Existing GenBlastG outputs reused
-```
-
-The HMMER/MAST reuse message is printed only for an integrated rescue TSV. A
-raw InterProScan TSV contains no rescued NB-ARC evidence and therefore cannot
-be described as reusing HMMER/MAST results.
-
 <a id="output-files"></a>
 ## Output files
 
@@ -346,20 +309,22 @@ final_NB-LRR-prediction.gff3
 - `final_NB-LRR-prediction.gff3` contains the filtered GenBlastG predictions and,
   when available, the recovered partial genes.
 
-Partial genes retain the original gene `ID` reported in the input GFF3. The same
+NB-LRR genes retain the original gene `ID` reported in the input GFF3. The same
 identifier is recorded in the `gene_id` column of the final TSV.
-
-When no annotation GFF3 is supplied, HRPv2 still generates the same three final
-files, but they contain only the filtered GenBlastG models.
 
 All workflow results are organised in six numbered directories:
 
 ```text
 01_preflight_validation_inputs/
+
 02_full-length_NB-LRR_annotation/
+
 03_gene_model_prediction/
+
 04_NB-LRR_model_annotation/
+
 05_filtered_NB-LRR_models/
+
 06_merged_NB-LRR_genes/
 ```
 
@@ -410,24 +375,7 @@ $CONDA_PREFIX/bin/
 ```
 
 <a id="notes-and-limitations"></a>
-## Notes and limitations
-
-- The protein FASTA, genome FASTA and optional GFF3 must use compatible sequence
-  and feature identifiers when merging is requested.
-- Identifier matching is exact. Ambiguous or missing associations are reported
-  and are never merged automatically.
-- Annotation-derived partial models can include the supported partial classes
-  retained by the current classifier. They are merged only when they do not
-  overlap retained GenBlastG loci and their identifiers can be resolved
-  unambiguously.
-- `partial_L` and `partial_CL` predictions remain sensitive to functional
-  annotation quality; inspect `exclusion_evidence` and the raw InterProScan
-  evidence when curating borderline cases.
-- The bridge rule selects two complete, non-overlapping replacement cores. Any
-  additional non-overlapping partial model in the same wider region is assessed
-  independently by the ordinary redundancy filter.
-- GenBlastG redundancy is assessed only for models on the same chromosome and
-  strand.
+## Notes
 - HRPv2 is designed for Linux 64-bit environments compatible with the selected
   InterProScan and GenBlastG releases.
 
@@ -439,6 +387,4 @@ University of Naples "Federico II", (Naples), Italy
 Plant Genetics and Biotechnology Unit   
 
 Please acknowledge the authors and cite the HRP publication when using this
-workflow in scientific research:
-
-Andolfo *et al.* (2022), *The Plant Journal*.
+workflow in scientific research: Andolfo *et al.* (2022), *The Plant Journal*.
