@@ -29,7 +29,7 @@ active environment.
 ### Python
 
 - Python 3.10 or newer.
-- HRPv2.2.2 uses only the Python standard library.
+- HRPv2 uses only the Python standard library.
 - No additional `pip` packages are required.
 
 ### InterProScan
@@ -116,7 +116,7 @@ Coils must also be available among the installed InterProScan applications.
 <a id="input-files"></a>
 ## Input files
 
-HRPv2.2.2 accepts two mandatory inputs and one optional input. Previously
+HRPv2 accepts two mandatory inputs and one optional input. Previously
 computed InterProScan, HMMER/MAST and GenBlastG results can also be supplied to
 reclassify an existing run without repeating the expensive external searches.
 
@@ -147,7 +147,7 @@ If the proteome is an external or specialised query dataset that does not match
 the target annotation, omit the GFF3 file. The merging operation will be skipped.
 
 <a id="hrpv222-workflow"></a>
-## HRPv2.2.2 workflow
+## HRPv2 workflow
 
 The terminal reports six sections at the start of their corresponding steps:
 
@@ -182,7 +182,7 @@ tie-break.
 <a id="domain-classification"></a>
 ## Domain classification
 
-HRPv2.2.2 classifies complete NB-LRR proteins as CNL, TNL, RNL or NL and
+HRPv2 classifies complete NB-LRR proteins as CNL, TNL, RNL or NL and
 retains supported partial architectures. In addition to the original domain
 criteria, the following accessions are interpreted explicitly:
 
@@ -211,7 +211,7 @@ Ordinary overlapping models are ranked deterministically, with a complete
 CNL/TNL/RNL/NL model preferred to a less complete overlapping model when the
 other filtering evidence is compatible.
 
-HRPv2.2.2 also prevents a long GenBlastG prediction from incorrectly merging
+HRPv2 also prevents a long GenBlastG prediction from incorrectly merging
 two adjacent NB-LRR loci:
 
 - `REPEATED_CORE` requires an ordered `NB-LRR ... NB-LRR` architecture.
@@ -226,24 +226,24 @@ two adjacent NB-LRR loci:
 Every overlap decision and its reason is written to the step-5 overlap report.
 
 <a id="running-hrpv222"></a>
-## Running HRPv2.2.2
+## Running HRPv2
 
 Make the script executable:
 
 ```bash
-chmod +x HRPv2.2.2.py
+chmod +x HRPv2.py
 ```
 
 ### Interactive execution
 
 ```bash
-./HRPv2.2.2.py
+./HRPv2.py
 ```
 
 or:
 
 ```bash
-python3 HRPv2.2.2.py
+python3 HRPv2.py
 ```
 
 The program requests:
@@ -257,7 +257,7 @@ Genome annotation GFF3 file (optional; press Enter to skip):
 ### Command-line execution with GFF3 merging
 
 ```bash
-python3 HRPv2.2.2.py \
+python3 HRPv2.py \
   --proteome species_proteins.fasta \
   --genome species_genome.fasta \
   --annotation-gff species_annotation.gff3 \
@@ -267,7 +267,7 @@ python3 HRPv2.2.2.py \
 ### Command-line execution without GFF3 merging
 
 ```bash
-python3 HRPv2.2.2.py \
+python3 HRPv2.py \
   --proteome query_proteins.fasta \
   --genome target_genome.fasta \
   --threads 8
@@ -276,13 +276,13 @@ python3 HRPv2.2.2.py \
 Display all options with:
 
 ```bash
-python3 HRPv2.2.2.py --help
+python3 HRPv2.py --help
 ```
 
 Display the version with:
 
 ```bash
-python3 HRPv2.2.2.py --version
+python3 HRPv2.py --version
 ```
 
 Use `--workdir` to place all six numbered output directories under a separate
@@ -297,11 +297,11 @@ InterProScan, GenBlastG, HMMER or MEME/MAST. Supply the integrated
 paired GenBlastG GFF and protein files:
 
 ```bash
-python3 HRPv2.2.2.py \
+python3 HRPv2.py \
   --proteome species_proteins.fasta \
   --genome species_genome.fasta \
   --annotation-gff species_annotation.gff3 \
-  --workdir HRPv2.2.2_reclassification \
+  --workdir HRPv2_reclassification \
   --threads 8 \
   --interpro-tsv 02_full-length_NB-LRR_annotation/proteome_NB-LRR.with_NB-ARC_rescue.tsv \
   --genblastg-gff 03_gene_model_prediction/genblastg_output.gff \
@@ -349,7 +349,7 @@ final_NB-LRR-prediction.gff3
 Partial genes retain the original gene `ID` reported in the input GFF3. The same
 identifier is recorded in the `gene_id` column of the final TSV.
 
-When no annotation GFF3 is supplied, HRPv2.2.2 still generates the same three final
+When no annotation GFF3 is supplied, HRPv2 still generates the same three final
 files, but they contain only the filtered GenBlastG models.
 
 All workflow results are organised in six numbered directories:
@@ -369,7 +369,7 @@ overlap decisions, unmatched annotation identifiers and ambiguous matches.
 <a id="interproscan-configuration"></a>
 ## InterProScan configuration
 
-HRPv2.2.2 executes InterProScan twice:
+HRPv2 executes InterProScan twice:
 
 1. On the input protein dataset to select full-length NB-LRR queries.
 2. On all proteins predicted by GenBlastG before filtering.
@@ -428,7 +428,7 @@ $CONDA_PREFIX/bin/
   independently by the ordinary redundancy filter.
 - GenBlastG redundancy is assessed only for models on the same chromosome and
   strand.
-- HRPv2.2.2 is designed for Linux 64-bit environments compatible with the selected
+- HRPv2 is designed for Linux 64-bit environments compatible with the selected
   InterProScan and GenBlastG releases.
 
 <a id="authorship"></a>
