@@ -1,12 +1,11 @@
 # HRPv2 installation guide for Ubuntu/Linux
 
 This document provides a reproducible, step-by-step installation procedure for
-running the complete HRPv2 pipeline on a 64-bit Ubuntu/Linux workstation or
-server. It is intended as a companion to `README_HRPv2.md`.
+running the complete HRPv2 pipeline on a 64-bit Ubuntu/Linux system.
+It is intended as a companion to `README_HRPv2.md`.
 
 The commands were checked against the executable requirements of
-`HRPv2.3.2.py`. If the distributed script is named `HRPv2.py`, use that name in
-the commands below.
+`HRPv2.py`.
 
 <a id="contents"></a>
 ## Contents
