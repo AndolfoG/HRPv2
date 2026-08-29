@@ -382,8 +382,8 @@ $CONDA_PREFIX/bin/
 <a id="authorship"></a>
 ## Authorship
 
-**Andolfo Giuseppe**  
-University of Naples "Federico II", (Naples), Italy
+**Andolfo Giuseppe, Ph.D.**  
+University of Naples "Federico II", Italy
 Plant Genetics and Biotechnology Unit   
 
 Please acknowledge the authors and cite the HRP publication when using this
