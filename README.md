@@ -138,6 +138,14 @@ reclassify an existing run without repeating the expensive external searches.
    This file hould be supplied only when it corresponds to the input proteome and target genome.
    If the proteome is an external or specialised query dataset that does not match the target annotation, omit the GFF3 file. The merging operation will be skipped.
 
+### Data preparation
+Download the genome sequence, the protein sequences (encoded by gene set) and genome annotation of interest, for example related to the tomato genome assembly SL2.4
+			
+	wget -O S_lycopersicum_2.4_genome.fasta https://solgenomics.net/ftp/genomes/Solanum_lycopersicum/Heinz1706/assembly/build_2.40/S_lycopersicum_chromosomes.2.40.fa.gz 
+	wget -O ITAG2.3_proteins.fasta https://solgenomics.net/ftp/genomes/Solanum_lycopersicum/Heinz1706/annotation/ITAG2.3_release/ITAG2.3_proteins.fasta 
+  wget -O ITAG2.3_gene_models.gff3 https://solgenomics.net/ftp/genomes/Solanum_lycopersicum/Heinz1706/annotation/ITAG2.3_release/ITAG2.3_gene_models.gff3
+
+
 <a id="hrpv222-workflow"></a>
 ## HRPv2 workflow
 
