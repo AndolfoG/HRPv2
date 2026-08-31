@@ -143,7 +143,7 @@ Download the genome sequence, the protein sequences (encoded by gene set) and ge
 			
 	wget -O S_lycopersicum_2.4_genome.fasta https://solgenomics.net/ftp/genomes/Solanum_lycopersicum/Heinz1706/assembly/build_2.40/S_lycopersicum_chromosomes.2.40.fa.gz 
 	wget -O ITAG2.3_proteins.fasta https://solgenomics.net/ftp/genomes/Solanum_lycopersicum/Heinz1706/annotation/ITAG2.3_release/ITAG2.3_proteins.fasta 
-  wget -O ITAG2.3_gene_models.gff3 https://solgenomics.net/ftp/genomes/Solanum_lycopersicum/Heinz1706/annotation/ITAG2.3_release/ITAG2.3_gene_models.gff3
+	wget -O ITAG2.3_gene_models.gff3 https://solgenomics.net/ftp/genomes/Solanum_lycopersicum/Heinz1706/annotation/ITAG2.3_release/ITAG2.3_gene_models.gff3
 
 
 <a id="hrpv222-workflow"></a>
