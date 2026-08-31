@@ -81,7 +81,7 @@ with the external bioinformatics software used by the workflow.
 Activate the environment containing GenBlastG and InterProScan:
 
 ```bash
-conda activate genblastg_env
+conda activate hrpv2_env
 ```
 
 Check the required software:
