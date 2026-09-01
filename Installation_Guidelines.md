@@ -2,7 +2,7 @@
 
 This document provides a reproducible, step-by-step installation procedure for
 running the complete HRPv2 pipeline on a 64-bit Ubuntu/Linux system.
-It is intended as a companion to `README_HRPv2.md`.
+It is intended as a companion to `README.md`.
 
 The commands were checked against the executable requirements of
 `HRPv2.py`.
@@ -20,11 +20,10 @@ The commands were checked against the executable requirements of
 - [8. Install HRPv2](#hrpv2)
 - [9. Validate the complete installation](#validation)
 - [10. Run a smoke test](#smoke-test)
-- [11. Run the complete pipeline](#complete-run)
-- [12. Reuse existing results](#reuse)
-- [13. Troubleshooting](#troubleshooting)
-- [14. Reproducibility and environment export](#reproducibility)
-- [15. Official resources](#resources)
+- [11. Running HRPv2](#running-hrpv2)
+- [12. Troubleshooting](#troubleshooting)
+- [13. Reproducibility and environment export](#reproducibility)
+- [14. Official resources](#resources)
 
 <a id="software-used"></a>
 ## 1. Software used by HRPv2
@@ -361,7 +360,7 @@ Copy the release into a project directory:
 ```bash
 mkdir -p "$HRPV2_ROOT/pipeline"
 cd "$HRPV2_ROOT/pipeline"
-cp /path/to/HRPv2.3.2.py HRPv2.py
+cp /path/to/HRPv2.py .
 chmod 755 HRPv2.py
 ```
 
@@ -476,50 +475,14 @@ find . -maxdepth 1 -type f \
   -print
 ```
 
-<a id="complete-run"></a>
-## 11. Run the complete pipeline
+<a id="running-hrpv2"></a>
+## 11. Running HRPv2
 
-```bash
-conda activate hrpv2_env
-cd /path/to/analysis_directory
-
-python3 /path/to/HRPv2.py \
-  --proteome proteins.fasta \
-  --genome genome.fasta \
-  --annotation-gff annotation.gff3 \
-  --workdir HRPv2_results \
-  --threads 24 \
-  --rescue-env hrpv2_env
-```
-
-The six output directories, log and manifest are written below `--workdir`.
-Use a new work directory for every independent run.
-
-<a id="reuse"></a>
-## 12. Reuse existing results
-
-The following mode reruns classification, filtering and merge without repeating
-InterProScan, GenBlastG, HMMER, MEME or MAST:
-
-```bash
-python3 /path/to/HRPv2.py \
-  --proteome proteins.fasta \
-  --genome genome.fasta \
-  --annotation-gff annotation.gff3 \
-  --workdir HRPv2_reclassification \
-  --threads 24 \
-  --interpro-tsv previous_run/02_full-length_NB-LRR_annotation/proteome_NB-LRR.with_NB-ARC_rescue.tsv \
-  --genblastg-gff previous_run/03_gene_model_prediction/genblastg_output.gff \
-  --genblastg-proteins previous_run/03_gene_model_prediction/genblastg_output.pro \
-  --predicted-interpro-tsv previous_run/04_NB-LRR_model_annotation/predicted_gene_models.with_NB-ARC_rescue.tsv \
-  --skip-nb-rescue
-```
-
-Use the integrated `with_NB-ARC_rescue.tsv` files if HMMER/MAST evidence must
-be retained while `--skip-nb-rescue` prevents recalculation.
+For complete execution commands, output-reuse procedures and output
+descriptions, see the corresponding sections of `README.md`.
 
 <a id="troubleshooting"></a>
-## 13. Troubleshooting
+## 12. Troubleshooting
 
 ### `required executable not found in PATH`
 
@@ -599,7 +562,7 @@ df -h
 ```
 
 <a id="reproducibility"></a>
-## 14. Reproducibility and environment export
+## 13. Reproducibility and environment export
 
 Record exact Conda packages:
 
@@ -634,7 +597,7 @@ Preserve together with each analysis:
 - the InterProScan release number.
 
 <a id="resources"></a>
-## 15. Official resources
+## 14. Official resources
 
 - [InterProScan download instructions](https://interproscan-docs.readthedocs.io/en/v5/HowToDownload.html)
 - [InterProScan command-line documentation](https://interproscan-docs.readthedocs.io/en/v5/HowToRun.html)
@@ -650,4 +613,4 @@ Preserve together with each analysis:
 
 ---
 
-Installation procedure prepared for HRPv2.3.2 on Ubuntu/Linux.
+Installation procedure prepared for HRPv2 on Ubuntu/Linux.
