@@ -9,10 +9,10 @@ Welcome to to the full-length **H**omology-based **R**-gene **P**rediction versi
 - [Essential software](#essential-software)
 - [Installation checks](#installation-checks)
 - [Input files](#input-files)
-- [HRPv2 workflow](#hrpv222-workflow)
+- [HRPv2 workflow](#hrpv2-workflow)
 - [Domain classification](#domain-classification)
 - [Redundancy and gene-fusion filtering](#redundancy-and-gene-fusion-filtering)
-- [Running HRPv2](#running-hrpv222)
+- [Running HRPv2](#running-hrpv2)
 - [Reusing existing outputs](#reusing-existing-outputs)
 - [Output files](#output-files)
 - [InterProScan configuration](#interproscan-configuration)
@@ -35,13 +35,17 @@ active environment.
 ### InterProScan
 
 - InterProScan 5.78-109.0, or a compatible InterProScan 5 release.
-- The Pfam, SUPERFAMILY and Coils applications and their data must be installed.
+- The Pfam, SUPERFAMILY, Coils, Gene3D, SMART, PANTHER, CDD, FunFam,
+  PRINTS and ProSiteProfiles applications and their data must be installed.
+- Phobius is used when available; HRPv2 retries without it only when
+  InterProScan explicitly reports that Phobius is deactivated.
 - The executable `interproscan.sh` must be available through `PATH`.
 
 HRPv2 runs InterProScan with:
 
 ```text
-Pfam,SUPERFAMILY,Coils
+Pfam,SUPERFAMILY,Coils,Gene3D,SMART,PANTHER,CDD,FunFam,
+PRINTS,ProSiteProfiles,Phobius
 ```
 
 ### Java
@@ -105,13 +109,13 @@ InterProScan version 5.78-109.0
 InterProScan 64-Bit build (requires Java 11)
 ```
 
-The required InterProScan data directories can be checked with:
+The principal InterProScan data directories can be checked with:
 
 ```bash
-ls /path/to/interproscan-5.78-109.0/data/{pfam,superfamily}
+ls /path/to/interproscan-5.78-109.0/data/
 ```
 
-Coils must also be available among the installed InterProScan applications.
+Confirm the complete application set with the InterProScan command-line help.
 
 <a id="input-files"></a>
 ## Input files
@@ -146,7 +150,7 @@ Download the genome sequence, the protein sequences (encoded by gene set) and ge
 	wget -O ITAG2.3_gene_models.gff3 https://solgenomics.net/ftp/genomes/Solanum_lycopersicum/Heinz1706/annotation/ITAG2.3_release/ITAG2.3_gene_models.gff3
 
 
-<a id="hrpv222-workflow"></a>
+<a id="hrpv2-workflow"></a>
 ## HRPv2 workflow
 
 The terminal reports six sections at the start of their corresponding steps:
@@ -172,8 +176,9 @@ The main operations are:
 3. Select full-length CNL, TNL, RNL and NL proteins.
 4. Use the selected proteins as GenBlastG queries against the target genome.
 5. Annotate and classify every protein predicted by GenBlastG.
-6. Exclude non-NB-LRR models, proteins shorter than 50 amino acids and gene models
-   longer than 20 kb.
+6. Exclude non-NB-LRR models, proteins shorter than 50 amino acids and ordinary
+   gene models longer than 20 kb. Complete NB-LRR models spanning 20,001–25,000
+   bp are retained only under the dedicated isolated-region rule.
 7. Resolve overlapping predictions only when they occur on the same chromosome
    and strand.
 8. Optionally recover unambiguous, supported annotated partial NB-LRR genes from
@@ -190,10 +195,12 @@ tie-break.
 HRPv2 classifies complete NB-LRR proteins as CNL, TNL, RNL or NL and
 retains supported partial architectures.
 
-Functional-description filtering is applied globally to `partial NB-LRR` genes.
-Descriptions typical of membrane receptors (RLP: receptor-like proteins and RLK: receptor-like kinase) act as a negative veto.
-This prevents generic plasma membrane receptors from being retained as partial NB-LRRs merely because another database reports
-an LRR signature. The triggering evidence is recorded in the
+Functional-description filtering is applied to `partial_L` and `partial_CL`
+architectures. Descriptions typical of membrane receptors (RLP:
+receptor-like proteins; RLK: receptor-like kinases) act as a negative veto.
+This prevents generic plasma-membrane receptors from being retained as partial
+NB-LRRs merely because another database reports an LRR signature. The
+triggering evidence is recorded in the
 `exclusion_evidence` column of the classification TSV.
 
 <a id="redundancy-and-gene-fusion-filtering"></a>
@@ -206,18 +213,22 @@ other filtering evidence is compatible.
 HRPv2 also prevents a long GenBlastG prediction from incorrectly merging
 two adjacent NB-LRR loci:
 
-- `REPEATED_CORE` requires an ordered `NB-LRR` architecture.
+- `REPEATED_NB-LRR_CORE` requires two complete, sequential `NB-LRR` cores.
 - `MULTI_NB_BRIDGE` identifies a multi-NB bridge that does not satisfy the
   strict repeated-core pattern.
-- A bridge can be replaced by two models only when both models are on the same
-  chromosome and strand as the bridge, are genomically distinct and strictly
-  non-overlapping, and each contains a complete NB-LRR core classified as CNL,
-  TNL, RNL or NL.
-- A complete-core plus partial-model pair cannot justify splitting a bridge.
+- `N/C-TERMINAL_BRIDGE` identifies an architecture in which the same
+  class-defining domain (CC, TIR or RPW8) occurs before an NB-LRR core and
+  again on its C-terminal side.
+- A bridge can be replaced only by two models on the same chromosome and
+  strand as the bridge that are genomically distinct and strictly
+  non-overlapping.
+- `REPEATED_NB-LRR_CORE` and `MULTI_NB_BRIDGE` require two complete cores.
+  An `N/C-TERMINAL_BRIDGE` may instead be resolved by a canonical full-length
+  model plus a compatible terminal full-length or partial model.
 
 Every overlap decision and its reason is written to the step-5 overlap report.
 
-<a id="running-hrpv222"></a>
+<a id="running-hrpv2"></a>
 ## Running HRPv2
 
 Make the script executable:
@@ -352,7 +363,7 @@ The equivalent command structure is:
 ```bash
 interproscan.sh \
   -i proteins.fasta \
-  -appl Pfam,SUPERFAMILY,Coils \
+  -appl Pfam,SUPERFAMILY,Coils,Gene3D,SMART,PANTHER,CDD,FunFam,PRINTS,ProSiteProfiles,Phobius \
   -f TSV,GFF3 \
   -b output_prefix \
   -cpu 4 \
@@ -390,9 +401,8 @@ $CONDA_PREFIX/bin/
 <a id="authorship"></a>
 ## Authorship
 
-**Andolfo Giuseppe, Ph.D.**  
-University of Naples "Federico II", Italy
-Plant Genetics and Biotechnology Unit   
+**Giuseppe Andolfo, Ph.D.**  
+University of Naples "Federico II", Italy  
 
 Please acknowledge the authors and cite the HRP publication when using this
 workflow in scientific research: Andolfo *et al.* (2022), *The Plant Journal*.
