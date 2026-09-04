@@ -54,7 +54,7 @@ PRINTS,ProSiteProfiles,Phobius
 
 ### Species-specific NB-LRR proteins rescue
 
-- HMMER, MEME Suite and MAFFT are required when the species-specific NB-ARC
+- HMMER, MEME Suite and MAFFT are required when the genome-specific NB-ARC
   rescue is enabled.
 - They may be installed in a separate Conda environment selected with
   `--rescue-env`.
