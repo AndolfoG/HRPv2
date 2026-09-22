@@ -1,4 +1,4 @@
-![HRP logo](https://github.com/AndolfoG/HRP-2.0/blob/main/LOGO.png)
+![HRP logo](https://github.com/AndolfoG/HRPv2/blob/main/LOGO.png)
 
 # Introduction
 Welcome to to the full-length **H**omology-based **R**-gene **P**rediction version 2.0 (**HRPv2**) project.
@@ -21,8 +21,7 @@ Welcome to to the full-length **H**omology-based **R**-gene **P**rediction versi
 - [Notes and limitations](#notes-and-limitations)
 - [Authorship](#authorship)
 
-<a id="essential-software"></a>
-
+<a id="installation-methods"></a>
 ## Installation methods
 
 Two methods are available:
@@ -30,6 +29,7 @@ Two methods are available:
 - [Conda installation](conda/README.md) — recommended
 - [Manual installation](Installation_Guidelines.md)
 
+<a id="essential-software"></a>
 ## Essential software
 
 Make sure the following programs are correctly installed and available in the
@@ -37,7 +37,7 @@ active environment.
 
 ### Python
 
-- Python 3.10 or newer.
+- Python 3.12 is the tested and supported release for HRPv2 2.0.0.
 - HRPv2 uses only the Python standard library.
 - No additional `pip` packages are required.
 
@@ -48,7 +48,9 @@ active environment.
   PRINTS and ProSiteProfiles applications and their data must be installed.
 - Phobius is used when available; HRPv2 retries without it only when
   InterProScan explicitly reports that Phobius is deactivated.
-- The executable `interproscan.sh` must be available through `PATH`.
+- InterProScan is installed separately. Supply the absolute path to
+  `interproscan.sh` with `--interproscan-bin` whenever existing InterProScan
+  results are not reused.
 
 HRPv2 runs InterProScan with:
 
@@ -65,10 +67,11 @@ PRINTS,ProSiteProfiles,Phobius
 
 - HMMER, MEME Suite and MAFFT are required when the genome-specific NB-ARC
   rescue is enabled.
-- They may be installed in a separate Conda environment selected with
-  `--rescue-env`.
+- They must be available in the active environment.
 - Use `--skip-nb-rescue` only to disable the rescue or when reusing an already
   integrated `with_NB-ARC_rescue.tsv` file.
+- The rescue requires at least 10 valid, non-redundant PF00931 training
+  regions. Use `--skip-nb-rescue` for datasets that do not meet this minimum.
 
 ### GenBlastG and legacy BLAST
 
@@ -85,29 +88,30 @@ release used in this workflow.
 
 ### Perl
 
-Perl should be installed in the working Conda environment for compatibility
-with the external bioinformatics software used by the workflow.
+Perl is installed as a dependency of the relevant external bioinformatics
+software in the supported Conda environment.
 
 <a id="installation-checks"></a>
 ## Installation checks
 
-Activate the environment containing GenBlastG and InterProScan:
+Activate the environment containing HRPv2 and its Conda-managed dependencies:
 
 ```bash
-conda activate hrpv2_env
+conda activate hrpv2
 ```
 
 Check the required software:
 
 ```bash
-python3 --version
+HRPv2 --version
+python --version
 java -version
-interproscan.sh --version
-which run_genblastG
-which genblastG
-which formatdb
-which blastall
-ls "$CONDA_PREFIX/bin/alignscore.txt"
+command -v run_genblastG
+command -v genblastG
+command -v formatdb
+command -v blastall
+test -r "$CONDA_PREFIX/share/hrpv2/alignscore.txt"
+/absolute/path/to/interproscan.sh --version
 ```
 
 For the configuration used during development, the expected InterProScan output
@@ -148,15 +152,25 @@ reclassify an existing run without repeating the expensive external searches.
 
 3. **Genome annotation in GFF3 format**
 
-   This file hould be supplied only when it corresponds to the input proteome and target genome.
+   This file should be supplied only when it corresponds to the input proteome and target genome.
    If the proteome is an external or specialised query dataset that does not match the target annotation, omit the GFF3 file. The merging operation will be skipped.
 
 ### Data preparation
-Download the genome sequence, the protein sequences (encoded by gene set) and genome annotation of interest, for example related to the tomato genome assembly SL2.4
-			
-	wget -O S_lycopersicum_2.4_genome.fasta https://solgenomics.net/ftp/genomes/Solanum_lycopersicum/Heinz1706/assembly/build_2.40/S_lycopersicum_chromosomes.2.40.fa.gz 
-	wget -O ITAG2.3_proteins.fasta https://solgenomics.net/ftp/genomes/Solanum_lycopersicum/Heinz1706/annotation/ITAG2.3_release/ITAG2.3_proteins.fasta 
-	wget -O ITAG2.3_gene_models.gff3 https://solgenomics.net/ftp/genomes/Solanum_lycopersicum/Heinz1706/annotation/ITAG2.3_release/ITAG2.3_gene_models.gff3
+
+Download the genome, protein sequences and matching structural annotation of
+interest. For example, the tomato SL2.4/ITAG2.3 files can be downloaded with:
+
+```bash
+wget -O S_lycopersicum_2.4_genome.fasta.gz \
+  https://solgenomics.net/ftp/genomes/Solanum_lycopersicum/Heinz1706/assembly/build_2.40/S_lycopersicum_chromosomes.2.40.fa.gz
+gunzip S_lycopersicum_2.4_genome.fasta.gz
+
+wget -O ITAG2.3_proteins.fasta \
+  https://solgenomics.net/ftp/genomes/Solanum_lycopersicum/Heinz1706/annotation/ITAG2.3_release/ITAG2.3_proteins.fasta
+
+wget -O ITAG2.3_gene_models.gff3 \
+  https://solgenomics.net/ftp/genomes/Solanum_lycopersicum/Heinz1706/annotation/ITAG2.3_release/ITAG2.3_gene_models.gff3
+```
 
 
 <a id="hrpv2-workflow"></a>
@@ -240,13 +254,22 @@ Every overlap decision and its reason is written to the step-5 overlap report.
 <a id="running-hrpv2"></a>
 ## Running HRPv2
 
-Make the script executable:
+The Conda package installs the `HRPv2` command. For a manual installation,
+make the script executable:
 
 ```bash
 chmod +x HRPv2.py
 ```
 
 ### Interactive execution
+
+With the Conda package:
+
+```bash
+HRPv2
+```
+
+With a manual installation:
 
 ```bash
 ./HRPv2.py
@@ -269,23 +292,24 @@ Genome annotation GFF3 file (optional; press Enter to skip):
 ### Command-line execution with GFF3 merging
 
 ```bash
-python3 HRPv2.py \
+HRPv2 \
   --proteome species_proteins.fasta \
   --genome species_genome.fasta \
   --annotation-gff species_annotation.gff3 \
+  --interproscan-bin /absolute/path/to/interproscan.sh \
   --threads 8
 ```
 
 Display all options with:
 
 ```bash
-python3 HRPv2.py --help
+HRPv2 --help
 ```
 
 Display the version with:
 
 ```bash
-python3 HRPv2.py --version
+HRPv2 --version
 ```
 
 Use `--workdir` to place all six numbered output directories under a separate
@@ -300,7 +324,7 @@ InterProScan, GenBlastG, HMMER or MEME/MAST. Supply the integrated
 paired GenBlastG GFF and protein files:
 
 ```bash
-python3 HRPv2.py \
+HRPv2 \
   --proteome species_proteins.fasta \
   --genome species_genome.fasta \
   --annotation-gff species_annotation.gff3 \
@@ -370,7 +394,7 @@ HRPv2 executes InterProScan twice:
 The equivalent command structure is:
 
 ```bash
-interproscan.sh \
+/absolute/path/to/interproscan.sh \
   -i proteins.fasta \
   -appl Pfam,SUPERFAMILY,Coils,Gene3D,SMART,PANTHER,CDD,FunFam,PRINTS,ProSiteProfiles,Phobius \
   -f TSV,GFF3 \
@@ -396,10 +420,11 @@ alignscore.txt
 ```
 
 The wrapper removes only the links that it created after GenBlastG terminates.
-The executable and supporting files are expected in:
+With the Conda package, the executable and support file are installed in:
 
 ```text
-$CONDA_PREFIX/bin/
+$CONDA_PREFIX/bin/run_genblastG
+$CONDA_PREFIX/share/hrpv2/alignscore.txt
 ```
 
 <a id="notes-and-limitations"></a>
