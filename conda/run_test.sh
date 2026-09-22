@@ -13,6 +13,7 @@ if HRPv2 --help | grep -q -- "--rescue-env"; then
 fi
 HRPv2 --help | grep -q -- "--interproscan-bin"
 python -m py_compile "$(command -v HRPv2)"
+bash -n "$(command -v run_genblastG)"
 for command_name in run_genblastG genblastG blastall formatdb hmmbuild hmmsearch meme meme2meme mast mafft; do
   command -v "${command_name}" >/dev/null
 done
