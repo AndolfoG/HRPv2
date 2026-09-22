@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+created_links=()
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+default_alignscore="${script_dir}/../share/hrpv2/alignscore.txt"
+
+cleanup() {
+  local item
+  for item in "${created_links[@]}"; do
+    if [ -L "$item" ]; then
+      unlink "$item"
+    fi
+  done
+}
+trap cleanup EXIT
+
+for item in blastall formatdb alignscore.txt; do
+  if [ -e "$item" ] || [ -L "$item" ]; then
+    continue
+  fi
+
+  if [ "$item" = "alignscore.txt" ]; then
+    source_path="${HRPV2_ALIGNSCORE:-$default_alignscore}"
+  else
+    source_path=$(command -v "$item" || true)
+  fi
+
+  if [ -z "$source_path" ] || [ ! -e "$source_path" ]; then
+    echo "Required GenBlastG support file not found: $source_path" >&2
+    exit 1
+  fi
+
+  ln -s "$source_path" "$item"
+  created_links+=("$item")
+done
+
+genblastg_path=$(command -v genblastG || true)
+if [ -z "$genblastg_path" ]; then
+  echo "Required executable not found in PATH: genblastG" >&2
+  exit 1
+fi
+
+"$genblastg_path" "$@"
