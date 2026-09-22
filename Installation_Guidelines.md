@@ -24,7 +24,7 @@ The commands were checked against the executable requirements of
 - [12. Troubleshooting](#troubleshooting)
 - [13. Reproducibility and environment export](#reproducibility)
 - [14. Official resources](#resources)
-- [15. Conda installation](#Conda-installation)
+- [15. Conda installation](#conda-installation)
 
 <a id="software-used"></a>
 ## 1. Software used by HRPv2
