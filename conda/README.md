@@ -43,6 +43,6 @@ Activate the environment with:
 conda activate hrpv2
 ```
 
-## InterProScan
+## NOTES
 InterProScan is not included in the Conda package. Install it separately and
 pass the absolute path to `interproscan.sh` through `--interproscan-bin`.
