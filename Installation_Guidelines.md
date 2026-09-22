@@ -1,8 +1,9 @@
 # HRPv2 installation guide for Ubuntu/Linux
 
-This document provides a reproducible, step-by-step installation procedure for
-running the complete HRPv2 pipeline on a 64-bit Ubuntu/Linux system.
-It is intended as a companion to `README.md`.
+This document provides the manual, step-by-step installation procedure for
+running the complete HRPv2 pipeline on a 64-bit Ubuntu/Linux system. For the
+recommended packaged installation, see [`conda/README.md`](conda/README.md).
+This guide is intended as a companion to `README.md`.
 
 The commands were checked against the executable requirements of
 `HRPv2.py`.
@@ -31,7 +32,7 @@ The commands were checked against the executable requirements of
 
 | Component | Role in HRPv2 | Installation used here |
 |---|---|---|
-| Python ≥3.10 | Pipeline, classification, filtering and merge | Conda |
+| Python 3.12 | Pipeline, classification, filtering and merge | Conda |
 | Perl | Compatibility with MEME Suite and legacy tools | Conda |
 | GenBlastG 1.38 | Homology-based gene-model prediction | Bioconda |
 | NCBI BLAST legacy | Provides `blastall` and `formatdb` for GenBlastG | Bioconda |
@@ -144,14 +145,14 @@ and the complete NB-ARC rescue toolchain:
 
 ```bash
 conda create -n hrpv2_env -y \
-  python=3.11 \
+  'python>=3.12,<3.13' \
   perl \
   openjdk=11 \
   genblastg=1.38 \
-  blast-legacy \
-  hmmer=3.4 \
-  meme \
-  mafft
+  blast-legacy=2.2.26 \
+  'hmmer>=3.4,<3.5' \
+  'meme>=5.5.9,<5.6' \
+  'mafft>=7.526,<7.527'
 ```
 
 Activate it:
@@ -160,20 +161,15 @@ Activate it:
 conda activate hrpv2_env
 ```
 
-The HRPv2 option used later must therefore be:
-
-```text
---rescue-env hrpv2_env
-```
-
 If the solver cannot produce the environment in one operation, create it in
 two stages:
 
 ```bash
-conda create -n hrpv2_env -y python=3.11 perl openjdk=11
+conda create -n hrpv2_env -y 'python>=3.12,<3.13' perl openjdk=11
 conda activate hrpv2_env
 conda install -y -c conda-forge -c bioconda \
-  genblastg=1.38 blast-legacy hmmer=3.4 meme mafft
+  genblastg=1.38 blast-legacy=2.2.26 \
+  'hmmer>=3.4,<3.5' 'meme>=5.5.9,<5.6' 'mafft>=7.526,<7.527'
 ```
 
 Do not replace `blast-legacy` with modern BLAST+: GenBlastG 1.38 expects the
@@ -189,77 +185,26 @@ conda activate hrpv2_env
 command -v genblastG
 command -v blastall
 command -v formatdb
-find "$CONDA_PREFIX" -name alignscore.txt -print
+test -r "$CONDA_PREFIX/share/hrpv2/alignscore.txt"
 ```
 
-All four components must exist. Copy `alignscore.txt` into the environment's
-`bin` directory only if the package installed it elsewhere:
+For a manual installation, create the HRPv2 support directory and install the
+supplied `alignscore.txt` file there:
 
 ```bash
-ALIGNSCORE_PATH=$(find "$CONDA_PREFIX" -name alignscore.txt -print -quit)
-test -n "$ALIGNSCORE_PATH"
-if [ "$ALIGNSCORE_PATH" != "$CONDA_PREFIX/bin/alignscore.txt" ]; then
-  cp "$ALIGNSCORE_PATH" "$CONDA_PREFIX/bin/alignscore.txt"
-fi
+install -d "$CONDA_PREFIX/share/hrpv2"
+install -m 644 /path/to/alignscore.txt \
+  "$CONDA_PREFIX/share/hrpv2/alignscore.txt"
 ```
 
 ### 6.2 Install the compatibility wrapper expected by HRPv2
 
-HRPv2 calls `run_genblastG` by default. The wrapper below exposes the legacy
-BLAST programs and `alignscore.txt` in GenBlastG's working directory, then
-removes only the symbolic links it created.
-
-Create the file:
+HRPv2 calls the supplied `run_genblastG` compatibility wrapper by default. Do
+not recreate or edit the wrapper manually; install the repository copy:
 
 ```bash
-nano "$CONDA_PREFIX/bin/run_genblastG"
-```
-
-Paste the following content:
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-created_links=()
-
-cleanup() {
-  local item
-  for item in "${created_links[@]}"; do
-    if [ -L "$item" ]; then
-      unlink "$item"
-    fi
-  done
-}
-trap cleanup EXIT
-
-for item in blastall formatdb alignscore.txt; do
-  if [ -e "$item" ] || [ -L "$item" ]; then
-    continue
-  fi
-
-  if [ "$item" = "alignscore.txt" ]; then
-    source_path="${CONDA_PREFIX}/bin/alignscore.txt"
-  else
-    source_path=$(command -v "$item")
-  fi
-
-  if [ ! -e "$source_path" ]; then
-    echo "Required GenBlastG support file not found: $source_path" >&2
-    exit 1
-  fi
-
-  ln -s "$source_path" "$item"
-  created_links+=("$item")
-done
-
-genblastG "$@"
-```
-
-Make it executable:
-
-```bash
-chmod 755 "$CONDA_PREFIX/bin/run_genblastG"
+install -m 755 /path/to/run_genblastG \
+  "$CONDA_PREFIX/bin/run_genblastG"
 ```
 
 The wrapper must be on `PATH` whenever the `hrpv2_env` environment is active:
@@ -316,25 +261,28 @@ python3 setup.py -f interproscan.properties
 archive may already contain indexed models, but running the official setup step
 is a useful validation.
 
-### 7.4 Expose InterProScan in the HRPv2 environment
+### 7.4 Record the InterProScan path
 
-Create a symbolic link in the active Conda environment:
+InterProScan does not need to be copied into the Conda environment. Record the
+absolute path to its executable:
 
 ```bash
-ln -s "$PWD/interproscan.sh" "$CONDA_PREFIX/bin/interproscan.sh"
+INTERPROSCAN_BIN=$(readlink -f "$PWD/interproscan.sh")
+test -x "$INTERPROSCAN_BIN"
+"$INTERPROSCAN_BIN" --version
 ```
 
-If the destination already exists, inspect it rather than overwriting it:
+Use this absolute path with every HRPv2 analysis that does not reuse existing
+InterProScan TSV files:
 
-```bash
-readlink -f "$CONDA_PREFIX/bin/interproscan.sh"
+```text
+--interproscan-bin /absolute/path/to/interproscan.sh
 ```
 
-Verify the version and available applications:
+Display the available applications with:
 
 ```bash
-interproscan.sh --version
-interproscan.sh 2>&1 | less
+"$INTERPROSCAN_BIN" 2>&1 | less
 ```
 
 Confirm that the following names occur under `Available analyses`:
@@ -387,12 +335,12 @@ python3 --version
 perl -v
 java -version
 
-interproscan.sh --version
+"$INTERPROSCAN_BIN" --version
 command -v run_genblastG
 command -v genblastG
 command -v blastall
 command -v formatdb
-test -s "$CONDA_PREFIX/bin/alignscore.txt"
+test -r "$CONDA_PREFIX/share/hrpv2/alignscore.txt"
 
 hmmbuild -h | head
 hmmsearch -h | head
@@ -402,17 +350,16 @@ mast -version
 mafft --version
 ```
 
-Validate the rescue environment exactly as HRPv2 will access it:
+Validate the rescue programs in the active environment exactly as HRPv2 will
+access them:
 
 ```bash
-conda run -n hrpv2_env sh -c '
-  command -v hmmsearch &&
-  command -v hmmbuild &&
-  command -v meme &&
-  command -v meme2meme &&
-  command -v mast &&
-  command -v mafft
-'
+command -v hmmsearch
+command -v hmmbuild
+command -v meme
+command -v meme2meme
+command -v mast
+command -v mafft
 ```
 
 Check the HRPv2 command without executing external analyses:
@@ -422,8 +369,8 @@ python3 HRPv2.py \
   --proteome /path/to/proteins.fasta \
   --genome /path/to/genome.fasta \
   --annotation-gff /path/to/annotation.gff3 \
+  --interproscan-bin "$INTERPROSCAN_BIN" \
   --threads 24 \
-  --rescue-env hrpv2_env \
   --dry-run
 ```
 
@@ -439,7 +386,7 @@ below.
 ```bash
 mkdir -p "$HRPV2_ROOT/tests/interproscan"
 cd "$HRPV2_ROOT/tests/interproscan"
-interproscan.sh \
+"$INTERPROSCAN_BIN" \
   -i /path/to/interproscan/test_all_appl.fasta \
   -appl Pfam,SUPERFAMILY,Coils,Gene3D,SMART,PANTHER,CDD,FunFam,PRINTS,ProSiteProfiles \
   -f TSV,GFF3 \
@@ -453,28 +400,26 @@ application name, confirm that Gene3D is active and use HRPv2's actual command
 to diagnose compatibility. Do not silently remove required applications from
 the pipeline script.
 
-### 10.2 GenBlastG test
+### 10.2 HRPv2 end-to-end test
 
-Use a small protein query and its matching genome:
-
-```bash
-mkdir -p "$HRPV2_ROOT/tests/genblastg"
-cd "$HRPV2_ROOT/tests/genblastg"
-
-run_genblastG \
-  -q query_protein.fasta \
-  -t small_genome.fasta \
-  -gff -pro \
-  -o genblastg_test
-```
-
-Confirm that `.gff` and `.pro` outputs were created:
+Test GenBlastG through HRPv2 rather than invoking its legacy command line
+independently. Use a small, internally consistent proteome, genome and GFF3
+subset:
 
 ```bash
-find . -maxdepth 1 -type f \
-  \( -name 'genblastg_test*.gff' -o -name 'genblastg_test*.pro' \) \
-  -print
+python3 /path/to/HRPv2.py \
+  --proteome /path/to/test_proteins.fasta \
+  --genome /path/to/test_genome.fasta \
+  --annotation-gff /path/to/test_annotation.gff3 \
+  --interproscan-bin "$INTERPROSCAN_BIN" \
+  --workdir "$HRPV2_ROOT/tests/hrpv2_run" \
+  --threads 4
 ```
+
+The NB-ARC rescue requires at least 10 valid, non-redundant, complete PF00931
+training regions. Add `--skip-nb-rescue` when the test dataset does not meet
+this minimum. A full validation of the rescue itself therefore requires a
+larger representative subset.
 
 <a id="running-hrpv2"></a>
 ## 11. Running HRPv2
@@ -491,10 +436,11 @@ Activate the environment and inspect `PATH`:
 
 ```bash
 conda activate hrpv2_env
-command -v python3 interproscan.sh run_genblastG
+command -v python3 run_genblastG
+test -x /absolute/path/to/interproscan.sh
 ```
 
-### `rescue environment ... is missing or incomplete`
+### A rescue executable is missing
 
 At least one of these programs is unavailable inside the environment:
 
@@ -502,8 +448,9 @@ At least one of these programs is unavailable inside the environment:
 hmmsearch hmmbuild meme meme2meme mast mafft
 ```
 
-Run the exact validation command in section 9 and reinstall the missing
-package.
+Activate `hrpv2_env`, run the validation commands in section 9 and reinstall
+the missing package. The current release does not use a separate rescue
+environment.
 
 ### Phobius is deactivated
 
@@ -518,7 +465,7 @@ InterProScan archive was extracted and that HRPv2 is resolving the intended
 `interproscan.sh`:
 
 ```bash
-readlink -f "$(command -v interproscan.sh)"
+readlink -f /absolute/path/to/interproscan.sh
 ```
 
 ### GenBlastG cannot find `blastall`, `formatdb` or `alignscore.txt`
@@ -527,7 +474,7 @@ Confirm the files and wrapper:
 
 ```bash
 command -v blastall formatdb genblastG run_genblastG
-ls -l "$CONDA_PREFIX/bin/alignscore.txt"
+ls -l "$CONDA_PREFIX/share/hrpv2/alignscore.txt"
 ```
 
 Run GenBlastG through `run_genblastG`, not directly through `genblastG`.
@@ -580,7 +527,7 @@ Record external versions:
   python3 --version
   perl -v | head -2
   java -version
-  interproscan.sh --version
+  "$INTERPROSCAN_BIN" --version
   hmmbuild -h | head -2
   meme -version
   mast -version
@@ -616,7 +563,7 @@ Preserve together with each analysis:
 
 Installation procedure prepared for HRPv2 on Ubuntu/Linux.
 
+<a id="conda-based-installation"></a>
 ## 15. Conda-based installation
 
 For the recommended Conda-based installation, see the [Conda installation guide](conda/README.md).
-
