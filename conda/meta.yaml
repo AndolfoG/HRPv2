@@ -1,0 +1,44 @@
+{% set name = "hrpv2" %}
+{% set version = "2.0.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/AndolfoG/HRPv2/releases/download/v{{ version }}/HRPv2-{{ version }}.tar.gz
+  sha256: eeca6adad28f95f69bad801d5a19cd5e7814f47cab6fb4761d3e998ad7b30856
+
+build:
+  number: 0
+  skip: true  # [not linux]
+
+requirements:
+  build:
+    - bash
+    - coreutils
+  run:
+    - python >=3.12,<3.13
+    - openjdk >=11,<12
+    - bash
+    - coreutils
+    - genblastg =1.38
+    - blast-legacy =2.2.26
+    - hmmer >=3.4,<3.5
+    - meme >=5.5.9,<5.6
+    - mafft >=7.526,<7.527
+
+about:
+  home: https://github.com/AndolfoG/HRPv2
+  license: GPL-3.0-only
+  license_file:
+    - LICENSE
+    - COPYRIGHT
+  summary: Genome-wide prediction, classification and filtering of plant NB-LRR resistance genes
+
+extra:
+  notes: |
+    InterProScan is not distributed with HRPv2. Install it separately and
+    provide the path to interproscan.sh with --interproscan-bin.
+  recipe-maintainers:
+    - AndolfoG
