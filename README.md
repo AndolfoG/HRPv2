@@ -6,6 +6,7 @@ Welcome to to the full-length **H**omology-based **R**-gene **P**rediction versi
 
 ## Table of contents
 
+- [Installation methods](#installation-methods)
 - [Essential software](#essential-software)
 - [Installation checks](#installation-checks)
 - [Input files](#input-files)
@@ -21,6 +22,14 @@ Welcome to to the full-length **H**omology-based **R**-gene **P**rediction versi
 - [Authorship](#authorship)
 
 <a id="essential-software"></a>
+
+## Installation methods
+
+Two methods are available:
+
+- [Conda installation](conda/README.md) — recommended
+- [Manual installation](Installation_Guidelines.md)
+
 ## Essential software
 
 Make sure the following programs are correctly installed and available in the
