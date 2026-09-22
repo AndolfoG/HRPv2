@@ -24,6 +24,7 @@ The commands were checked against the executable requirements of
 - [12. Troubleshooting](#troubleshooting)
 - [13. Reproducibility and environment export](#reproducibility)
 - [14. Official resources](#resources)
+- [15. Conda installation](#Conda-installation)
 
 <a id="software-used"></a>
 ## 1. Software used by HRPv2
@@ -614,3 +615,8 @@ Preserve together with each analysis:
 ---
 
 Installation procedure prepared for HRPv2 on Ubuntu/Linux.
+
+## 15. Conda installation
+
+For the recommended Conda-based installation, see the [Conda installation guide](conda/README.md).
+
