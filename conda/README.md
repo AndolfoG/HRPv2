@@ -104,9 +104,12 @@ cd HRPv2
 conda build conda
 ```
 
-The recipe is restricted to Linux. During the build, `run_test.sh` verifies
-the Python and dependency versions, the HRPv2 command-line interface, required
-executables and the installed `alignscore.txt` support file.
+HRPv2 is packaged as `noarch: generic` because its installed scripts and data
+files are platform-independent. Practical execution is currently supported on
+Linux because GenBlastG and BLAST legacy are Linux runtime dependencies. During
+the build, `run_test.sh` verifies the Python and dependency versions, the HRPv2
+command-line interface, required executables and the installed `alignscore.txt`
+support file.
 
 ## Installing the local build
 
