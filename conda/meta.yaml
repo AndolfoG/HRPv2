@@ -54,6 +54,7 @@ about:
   license_file:
     - LICENSE
     - COPYRIGHT
+    - NOTICE
   summary: Genome-wide prediction, classification and filtering of plant NB-LRR resistance genes
 
 extra:
