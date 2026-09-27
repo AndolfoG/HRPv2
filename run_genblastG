@@ -3,7 +3,7 @@ set -euo pipefail
 
 created_links=()
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-default_alignscore="${script_dir}/../share/hrpv2/alignscore.txt"
+default_alignscore="${script_dir}/alignscore.txt"
 
 cleanup() {
   local item
