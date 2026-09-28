@@ -194,6 +194,7 @@ From the repository directory, check the wrapper and support files:
 
 ```bash
 conda activate hrpv2_env
+chmod 755 ./run_genblastG
 command -v genblastG
 command -v blastall
 command -v formatdb
@@ -220,6 +221,12 @@ The wrapper must be on `PATH` whenever the `hrpv2_env` environment is active:
 ```bash
 command -v run_genblastG
 ```
+
+This manual procedure installs both `run_genblastG` and `alignscore.txt` in
+`$CONDA_PREFIX/bin`. By contrast, the Conda package installs the wrapper in
+`$CONDA_PREFIX/bin` and `alignscore.txt` in `$CONDA_PREFIX/share/hrpv2`; its
+packaged wrapper is configured for that layout. Do not interchange the manual
+and Conda wrapper versions.
 
 <a id="interproscan"></a>
 ## 7. Install InterProScan
